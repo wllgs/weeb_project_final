@@ -3,7 +3,7 @@ from .models import Article, ContactMessage
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ("title", "is_published", "created_at")
+    list_display = ("title", "author", "is_published", "created_at")
     search_fields = ("title", "content")
     list_filter = ("is_published",)
 

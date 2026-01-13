@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -6,6 +7,13 @@ class Article(models.Model):
 
     title = models.CharField(max_length=200)
     content = models.TextField()
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="articles",
+    )
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -18,12 +26,11 @@ class Article(models.Model):
 
 
 class ContactMessage(models.Model):
-    """Message de contact + évaluation de satisfaction (0 = -, 1 = neutre, 2 = +)."""
+    """Message de contact + evaluation de satisfaction (0 = -, 1 = +)."""
 
     SATISFACTION_CHOICES = (
-        (0, "Négatif"),
-        (1, "Neutre"),
-        (2, "Positif"),
+        (0, "Negatif"),
+        (1, "Positif"),
     )
 
     first_name = models.CharField(max_length=120, blank=True, default="")
@@ -35,12 +42,12 @@ class ContactMessage(models.Model):
     newsletter_opt_in = models.BooleanField(default=False)
     satisfaction = models.PositiveSmallIntegerField(
         choices=SATISFACTION_CHOICES,
-        default=1,
-        help_text="0 = négatif, 1 = neutre, 2 = positif",
+        default=0,
+        help_text="0 = negatif, 1 = positif",
     )
     satisfaction_score = models.FloatField(
-        help_text="Score pondéré du classifieur (0..2).",
-        default=1.0,
+        help_text="Probabilite estimee d'etre positif (0..1).",
+        default=0.5,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

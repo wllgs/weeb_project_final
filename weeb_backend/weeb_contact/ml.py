@@ -12,7 +12,7 @@ def _load_model():
             return pickle.load(model_file)
     except FileNotFoundError as exc:
         raise RuntimeError(
-            f"Impossible de charger le modèle de satisfaction ({MODEL_PATH})"
+            f"Impossible de charger le modele de satisfaction ({MODEL_PATH})"
         ) from exc
 
 
@@ -21,22 +21,27 @@ MODEL = _load_model()
 
 def predict_satisfaction(message: str) -> Tuple[int, float]:
     """
-    Retourne (label, score) pour un message donné.
-    - label est 0 (négatif), 1 (neutre) ou 2 (positif)
-    - score est la moyenne pondérée des probabilités (entre 0 et 2)
+    Retourne (label, score) pour un message donne.
+    - label est 0 (negatif) ou 1 (positif)
+    - score est la probabilite estimee d'etre positif (entre 0 et 1)
     """
     if not message:
-        raise ValueError("message manquant pour la prédiction")
+        raise ValueError("message manquant pour la prediction")
 
     prediction = MODEL.predict([message])[0]
 
-    # Calcul d'un score moyen en utilisant les probabilités retournées par le modèle
+    # Probabilite de la classe positive (1) si disponible.
     try:
         proba = MODEL.predict_proba([message])[0]
-        classes = MODEL.classes_
-        score = sum(int(cls) * float(p) for cls, p in zip(classes, proba))
+        classes = list(MODEL.classes_)
+        if 1 in classes:
+            score = float(proba[classes.index(1)])
+        elif 0 in classes and len(classes) > 1:
+            score = 1.0 - float(proba[classes.index(0)])
+        else:
+            score = float(prediction)
     except Exception:
-        # Au cas où predict_proba n'est pas disponible
+        # Au cas ou predict_proba n'est pas disponible
         score = float(prediction)
 
     return int(prediction), score

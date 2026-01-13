@@ -1,6 +1,6 @@
 import json
 
-from django.db.models import Avg, Count, Q
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -18,7 +18,7 @@ from .serializers import ContactMessageSerializer
 class ContactMessageCreateView(CreateAPIView):
     """
     Endpoint POST /api/contact/
-    Enregistre un message et calcule la satisfaction (0 = -, 1 = neutre, 2 = +).
+    Enregistre un message et calcule la satisfaction (0 = negatif, 1 = positif).
     """
 
     serializer_class = ContactMessageSerializer
@@ -35,25 +35,23 @@ class ContactMessageCreateView(CreateAPIView):
 def satisfaction_analytics(request):
     """
     Endpoint GET /api/analytics/satisfaction/
-    Retourne les statistiques globales (négatifs / neutres / positifs + ratio moyen).
+    Retourne les statistiques globales (negatifs / positifs + ratio moyen).
     """
 
     agg = ContactMessage.objects.aggregate(
         total=Count("id"),
         negatives=Count("id", filter=Q(satisfaction=0)),
-        neutrals=Count("id", filter=Q(satisfaction=1)),
-        positives=Count("id", filter=Q(satisfaction=2)),
-        average=Avg("satisfaction"),
+        positives=Count("id", filter=Q(satisfaction__gte=1)),
     )
     total = agg["total"] or 0
+    positives = agg["positives"] or 0
 
     return Response(
         {
             "total": total,
             "negatives": agg["negatives"] or 0,
-            "neutrals": agg["neutrals"] or 0,
-            "positives": agg["positives"] or 0,
-            "satisfaction_ratio": agg["average"] if total else None,
+            "positives": positives,
+            "satisfaction_ratio": (positives / total) if total else None,
         }
     )
 
@@ -62,7 +60,7 @@ def satisfaction_analytics(request):
 @require_POST
 def PredictSatisfaction(request):
     """
-    Endpoint utilitaire: POST {"message": "..."} -> {"satisfaction": 0|1|2, "score": float}
+    Endpoint utilitaire: POST {"message": "..."} -> {"satisfaction": 0|1, "score": float}
     """
 
     try:
@@ -80,7 +78,7 @@ def PredictSatisfaction(request):
         satisfaction, score = predict_satisfaction(comment)
     except Exception as exc:
         return JsonResponse(
-            {"error": f"Impossible de générer la prédiction: {exc}"}, status=500
+            {"error": f"Impossible de generer la prediction: {exc}"}, status=500
         )
 
     return JsonResponse({"satisfaction": satisfaction, "score": score})

@@ -8,4 +8,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("weeb_app.urls")),
     path("api/", include("weeb_contact.urls")),
+    path("api/auth/", include("users.urls")),
 ]
