@@ -22,3 +22,5 @@ weeb/.env.*
 # System
 .DS_Store
 Thumbs.db
+
+YoutubeCommentsDataset.csv

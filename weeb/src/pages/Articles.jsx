@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -31,6 +32,7 @@ const ArticleSkeleton = () => (
 );
 
 export default function Articles() {
+  const { isMember, user } = useAuth();
   const { data, loading, error, fetchData } = useFetch();
   const [page, setPage] = useState(1);
 
@@ -48,6 +50,13 @@ export default function Articles() {
       <Header />
       <main className="flex-grow px-4 py-12 w-full">
         <section className="max-w-5xl mx-auto text-center mb-12">
+          {isMember && (
+            <div className="flex justify-center mb-6">
+              <Button as={Link} to="/articles/new">
+                Publier un article
+              </Button>
+            </div>
+          )}
           <p className="text-sm uppercase tracking-widest text-purple-300 mb-3">Blog</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Les articles de la communauté</h1>
           <p className="text-gray-300 text-lg">
@@ -106,7 +115,7 @@ export default function Articles() {
                         </p>
                         {!article.is_published && (
                           <span className="inline-block mt-4 text-xs uppercase tracking-wide text-yellow-300">
-                            Brouillon
+                            {user && article.author?.id === user.id ? "Brouillon (vous)" : "Brouillon"}
                           </span>
                         )}
                       </article>

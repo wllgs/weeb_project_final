@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Button from "../components/Button";
@@ -53,12 +53,12 @@ export default function Contact() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      setStatus({ type: "success", message: "Merci pour votre message ! Nous revenons vers vous trÃ¨s vite." });
+      setStatus({ type: "success", message: "Merci pour votre message ! Nous revenons vers vous très vite." });
       setValues(initialValues);
     } catch (err) {
       setStatus({
         type: "error",
-        message: err.message || "Impossible d'enregistrer votre message, veuillez rÃ©essayer.",
+        message: err.message || "Impossible d'enregistrer votre message, veuillez réessayer.",
       });
     }
   };
