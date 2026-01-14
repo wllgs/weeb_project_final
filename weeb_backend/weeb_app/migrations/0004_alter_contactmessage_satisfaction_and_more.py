@@ -3,21 +3,61 @@
 from django.db import migrations, models
 
 
+def convert_satisfaction_boolean_to_smallint(apps, schema_editor):
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT data_type
+            FROM information_schema.columns
+            WHERE table_name = 'weeb_app_contactmessage'
+              AND column_name = 'satisfaction';
+            """
+        )
+        row = cursor.fetchone()
+    if not row or row[0] != "boolean":
+        return
+    schema_editor.execute(
+        """
+        ALTER TABLE weeb_app_contactmessage
+        ALTER COLUMN satisfaction
+        TYPE smallint
+        USING CASE
+            WHEN satisfaction IS TRUE THEN 1
+            WHEN satisfaction IS FALSE THEN 0
+            ELSE 0
+        END;
+        """
+    )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('weeb_app', '0003_contactmessage_newsletter_opt_in'),
+        ("weeb_app", "0003_contactmessage_newsletter_opt_in"),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='contactmessage',
-            name='satisfaction',
-            field=models.PositiveSmallIntegerField(choices=[(0, 'Négatif'), (1, 'Neutre'), (2, 'Positif')], default=1, help_text='0 = négatif, 1 = neutre, 2 = positif'),
+        migrations.RunPython(
+            convert_satisfaction_boolean_to_smallint,
+            migrations.RunPython.noop,
         ),
         migrations.AlterField(
-            model_name='contactmessage',
-            name='satisfaction_score',
-            field=models.FloatField(default=1.0, help_text='Score pondéré du classifieur (0..2).'),
+            model_name="contactmessage",
+            name="satisfaction",
+            field=models.PositiveSmallIntegerField(
+                choices=[(0, "Negatif"), (1, "Neutre"), (2, "Positif")],
+                default=1,
+                help_text="0 = negatif, 1 = neutre, 2 = positif",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="contactmessage",
+            name="satisfaction_score",
+            field=models.FloatField(
+                default=1.0,
+                help_text="Score pondere du classifieur (0..2).",
+            ),
         ),
     ]

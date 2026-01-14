@@ -6,6 +6,18 @@ from django.db import migrations, models
 def convert_satisfaction_boolean_to_smallint(apps, schema_editor):
     if schema_editor.connection.vendor != "postgresql":
         return
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT data_type
+            FROM information_schema.columns
+            WHERE table_name = 'weeb_app_contactmessage'
+              AND column_name = 'satisfaction';
+            """
+        )
+        row = cursor.fetchone()
+    if not row or row[0] != "boolean":
+        return
     schema_editor.execute(
         """
         ALTER TABLE weeb_app_contactmessage
