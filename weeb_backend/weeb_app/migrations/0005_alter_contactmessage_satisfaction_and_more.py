@@ -3,6 +3,23 @@
 from django.db import migrations, models
 
 
+def convert_satisfaction_boolean_to_smallint(apps, schema_editor):
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    schema_editor.execute(
+        """
+        ALTER TABLE weeb_app_contactmessage
+        ALTER COLUMN satisfaction
+        TYPE smallint
+        USING CASE
+            WHEN satisfaction IS TRUE THEN 1
+            WHEN satisfaction IS FALSE THEN 0
+            ELSE 0
+        END;
+        """
+    )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,6 +27,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(convert_satisfaction_boolean_to_smallint, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='contactmessage',
             name='satisfaction',
