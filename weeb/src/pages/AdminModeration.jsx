@@ -72,6 +72,8 @@ export default function AdminModeration() {
                 <div
                   key={user.id}
                   className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border border-purple-500/20 rounded-xl p-4"
+                  data-testid={`user-card-${user.id}`}
+                  data-email={user.email}
                 >
                   <div>
                     <p className="text-lg font-semibold">{user.email}</p>

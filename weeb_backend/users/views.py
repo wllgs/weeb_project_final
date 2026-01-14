@@ -111,6 +111,7 @@ class AdminUserViewSet(viewsets.ModelViewSet):
     serializer_class = AdminUserSerializer
     queryset = CustomUser.objects.all().order_by("-date_joined")
     http_method_names = ["get", "patch", "head", "options"]
+    pagination_class = None
 
 
 class PasswordResetRequestView(APIView):

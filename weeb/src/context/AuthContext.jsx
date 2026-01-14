@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { apiClient } from "../lib/apiClient";
 import { endpoints } from "../config/api";
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(null);
