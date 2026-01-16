@@ -45,19 +45,19 @@ export default function Footer() {
           <p className="text-center text-sm py-6">@ 2025 Weeb, Inc. Tous droits réservés.</p>
           <div className="flex justify-center md:justify-end gap-4 mt-4 md:mt-0 py-4">
             <a href="#" aria-label="YouTube">
-              <img src="logos/youtube.png" alt="YouTube" className="w-6 h-6" /> 
+              <img src="/logos/youtube.png" alt="YouTube" className="w-6 h-6" />
             </a>
             <a href="#" aria-label="Facebook">
-              <img src="logos/facebook.png" alt="Facebook" className="w-6 h-6" /> 
+              <img src="/logos/facebook.png" alt="Facebook" className="w-6 h-6" />
             </a>
             <a href="#" aria-label="Twitter">
-              <img src="logos/twitter.png" alt="Twitter" className="w-6 h-6" /> 
+              <img src="/logos/twitter.png" alt="Twitter" className="w-6 h-6" />
             </a>
             <a href="#" aria-label="Instagram">
-              <img src="logos/instagram.png" alt="Instagram" className="w-6 h-6" /> 
+              <img src="/logos/instagram.png" alt="Instagram" className="w-6 h-6" />
             </a>
             <a href="#" aria-label="LinkedIn">
-              <img src="logos/linkedin.png" alt="LinkedIn" className="w-6 h-6" /> 
+              <img src="/logos/linkedin.png" alt="LinkedIn" className="w-6 h-6" />
             </a>
           </div>
         </div>

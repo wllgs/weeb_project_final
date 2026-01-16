@@ -10,12 +10,21 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const refreshAccessToken = useCallback(async () => {
-    const response = await apiClient.post(endpoints.authRefresh, {}, { skipAuth: true });
-    const token = response.data?.access || null;
-    if (token) {
-      setAccessToken(token);
+    try {
+      const response = await apiClient.post(endpoints.authRefresh, {}, { skipAuth: true });
+      const token = response.data?.access || null;
+      if (token) {
+        setAccessToken(token);
+      }
+      return token;
+    } catch (error) {
+      const status = error?.response?.status;
+      if (status === 400 || status === 401) {
+        setAccessToken(null);
+        return null;
+      }
+      throw error;
     }
-    return token;
   }, []);
 
   const fetchMe = useCallback(async () => {

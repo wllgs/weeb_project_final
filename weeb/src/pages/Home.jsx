@@ -73,11 +73,11 @@ export default function Home() {
       <section className="text-center py-16">
         <h2 className="text-4xl md:text-5xl font-bold mb-16">Ils nous font confiance</h2>
         <div className="flex flex-wrap justify-center items-center gap-16 px-4">
-          <img src="logos/smartfinder.png" alt="SmartFinder" className="h-7" />
-          <img src="logos/zoomerr.png" alt="Zoomerr" className="h-7" />
-          <img src="logos/shells.png" alt="Shells" className="h-7" />
-          <img src="logos/waves.png" alt="Waves" className="h-7" />
-          <img src="logos/artvenue.png" alt="ArtVenue" className="h-7" />
+          <img src="/logos/smartfinder.png" alt="SmartFinder" className="h-7" />
+          <img src="/logos/zoomerr.png" alt="Zoomerr" className="h-7" />
+          <img src="/logos/shells.png" alt="Shells" className="h-7" />
+          <img src="/logos/waves.png" alt="Waves" className="h-7" />
+          <img src="/logos/artvenue.png" alt="ArtVenue" className="h-7" />
         </div>
       </section>
 
@@ -116,7 +116,7 @@ export default function Home() {
       {/* Tendances */}
       <section className="grid md:grid-cols-3 gap-16 py-14 px-6 max-w-6xl mx-auto items-center">
         <div className="hidden md:flex justify-center col-span-1">
-          <img src="logos/Shapes.png" alt="Illustration Tendances" className="w-full max-w-sm" />
+          <img src="/logos/Shapes.png" alt="Illustration Tendances" className="w-full max-w-sm" />
         </div>
         <div className="col-span-3 md:col-span-2">
           <h3 className="text-white text-xl font-semibold mb-5 tracking-widest uppercase">
