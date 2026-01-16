@@ -7,6 +7,7 @@ import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import NewArticle from "./pages/NewArticle";
 import AdminModeration from "./pages/AdminModeration";
+import ContactMessages from "./pages/ContactMessages";
 import ResetPassword from "./pages/ResetPassword";
 import ResetPasswordConfirm from "./pages/ResetPasswordConfirm";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -23,6 +24,14 @@ export default function App() {
       <Route path="/articles" element={<Articles />} />
       <Route path="/articles/:id" element={<ArticleDetail />} />
       <Route
+        path="/articles/:id/edit"
+        element={(
+          <ProtectedRoute requireActive>
+            <NewArticle />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
         path="/articles/new"
         element={(
           <ProtectedRoute requireActive>
@@ -33,8 +42,16 @@ export default function App() {
       <Route
         path="/admin/moderation"
         element={(
-          <ProtectedRoute requireStaff>
+          <ProtectedRoute requireAdmin>
             <AdminModeration />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/admin/messages"
+        element={(
+          <ProtectedRoute requireActive>
+            <ContactMessages />
           </ProtectedRoute>
         )}
       />

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Button from "../components/Button";
 import ArticleCard from "../components/ArticleCard";
-import useFetch from "../hooks/useFetch";
+import { apiClient } from "../lib/apiClient";
 import { endpoints } from "../config/api";
 
 const ArticleSkeleton = () => (
@@ -24,15 +24,41 @@ const ArticleSkeleton = () => (
 );
 
 export default function Articles() {
-  const { isMember, user } = useAuth();
-  const { data, loading, error, fetchData } = useFetch();
+  const { isMember, isAdmin, user, loading: authLoading } = useAuth();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
+  const canReviewDrafts = isAdmin || isMember;
 
   useEffect(() => {
-    fetchData(`${endpoints.articles}?page=${page}`);
-  }, [fetchData, page]);
+    if (authLoading) {
+      return;
+    }
+    const loadArticles = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await apiClient.get(`${endpoints.articles}?page=${page}`);
+        setData(response.data);
+      } catch (err) {
+        setError(err?.response?.data?.detail || "Une erreur est survenue.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadArticles();
+  }, [page, authLoading, isAdmin, isMember]);
 
   const articles = useMemo(() => data?.results ?? [], [data]);
+  const publishedArticles = useMemo(
+    () => articles.filter((article) => article.is_published),
+    [articles]
+  );
+  const draftArticles = useMemo(
+    () => articles.filter((article) => !article.is_published),
+    [articles]
+  );
 
   const canGoPrev = Boolean(data?.previous);
   const canGoNext = Boolean(data?.next);
@@ -50,18 +76,17 @@ export default function Articles() {
             </div>
           )}
           <p className="text-sm uppercase tracking-widest text-purple-300 mb-3">Blog</p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Les articles de la communauté</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Les articles de la communaute</h1>
           <p className="text-gray-300 text-lg">
             Retrouvez ici toutes les publications de <strong>Weeb</strong>. <br />
-            Connectez-vous en tant qu’administrateur pour publier,
-            éditer ou supprimer des articles.
+            Connectez-vous en tant qu&apos;administrateur ou membre actif pour publier, editer ou supprimer des articles.
           </p>
         </section>
 
         <section className="max-w-5xl mx-auto space-y-10">
           {error && (
             <p className="text-center text-red-400">
-              Impossible de récupérer les articles&nbsp;: {error.message || "veuillez réessayer plus tard."}
+              Impossible de recuperer les articles&nbsp;: {error || "veuillez reessayer plus tard."}
             </p>
           )}
 
@@ -73,21 +98,25 @@ export default function Articles() {
             </div>
           )}
 
-          {!loading && !error && articles.length === 0 && (
-            <p className="text-center text-gray-300">Aucun article pour le moment. Revenez bientôt !</p>
+          {!loading && !error && publishedArticles.length === 0 && !canReviewDrafts && (
+            <p className="text-center text-gray-300">Aucun article pour le moment. Revenez bientot !</p>
+          )}
+
+          {!loading && !error && publishedArticles.length === 0 && canReviewDrafts && draftArticles.length === 0 && (
+            <p className="text-center text-gray-300">Aucun article pour le moment. Revenez bientot !</p>
           )}
 
           <AnimatePresence mode="wait">
-            {!loading && !error && articles.length > 0 && (
+            {!loading && !error && publishedArticles.length > 0 && (
               <motion.div
-                key={`articles-page-${page}-${articles.length}`}
+                key={`articles-page-${page}-${publishedArticles.length}`}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 className="grid gap-6"
               >
-                {articles.map((article) => (
+                {publishedArticles.map((article) => (
                   <motion.div
                     key={article.id}
                     layout
@@ -96,20 +125,37 @@ export default function Articles() {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                     className="focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-2xl"
                   >
-                    <ArticleCard
-                      article={article}
-                      draftLabel={user && article.author?.id === user.id ? "Brouillon (vous)" : "Brouillon"}
-                    />
+                    <ArticleCard article={article} />
                   </motion.div>
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
 
+          {canReviewDrafts && draftArticles.length > 0 && (
+            <div className="pt-6">
+              <h2 className="text-xl font-semibold text-purple-200 mb-4">Brouillons a reprendre</h2>
+              <div className="grid gap-6">
+                {draftArticles.map((article) => {
+                  const isOwner = user && article.author?.id === user.id;
+                  const canEditDraft = canReviewDrafts || isOwner;
+                  return (
+                    <ArticleCard
+                      key={article.id}
+                      article={article}
+                      draftLabel={isOwner ? "Brouillon (vous)" : "Brouillon"}
+                      linkTo={canEditDraft ? `/articles/${article.id}/edit` : `/articles/${article.id}`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {data && (canGoPrev || canGoNext) && (
             <div className="flex items-center justify-center gap-4 pt-4">
               <Button onClick={() => canGoPrev && setPage((prev) => Math.max(prev - 1, 1))} disabled={!canGoPrev || loading}>
-                Page précédente
+                Page precedente
               </Button>
               <div className="text-gray-300">
                 Page {data.current_page ?? page} / {data.total_pages ?? "?"}

@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import Button from './Button';
 import { useAuth } from '../context/AuthContext';
+import { BACKEND_BASE_URL } from '../config/api';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, isMember, isAdmin, user, logout } = useAuth();
+  const canReviewMessages = isAdmin || isMember;
 
   return (
     <header className="w-full bg-transparent py-8 flex justify-center">
@@ -27,6 +29,11 @@ export default function Header() {
               Moderation
             </Link>
           )}
+          {canReviewMessages && (
+            <Link to="/admin/messages" className="hidden md:inline-block text-white text-base font-normal hover:text-purple-400 transition">
+              Commentaires
+            </Link>
+          )}
           <Link to="/contact" className="hidden md:inline-block text-white text-base font-normal hover:text-purple-400 transition">
             Contact
           </Link>
@@ -43,7 +50,7 @@ export default function Header() {
               )}
               {isAdmin && (
                 <a
-                  href="http://localhost:8000/admin/"
+                  href={`${BACKEND_BASE_URL}/admin/`}
                   className="text-xs uppercase tracking-wide text-purple-300 hover:text-purple-100 whitespace-nowrap"
                   target="_blank"
                   rel="noreferrer"
@@ -102,6 +109,15 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Moderation
+            </Link>
+          )}
+          {canReviewMessages && (
+            <Link
+              to="/admin/messages"
+              className="text-white text-xl font-normal mb-6"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Commentaires
             </Link>
           )}
           <Link

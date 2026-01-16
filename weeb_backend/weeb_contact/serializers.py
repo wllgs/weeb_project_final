@@ -4,7 +4,7 @@ from weeb_app.models import ContactMessage
 
 
 class ContactMessageSerializer(serializers.ModelSerializer):
-    """Sérialiseur utilisé pour créer / lister les messages de contact."""
+    """Serialiseur utilise pour creer les messages de contact."""
 
     class Meta:
         model = ContactMessage
@@ -32,3 +32,11 @@ class ContactMessageSerializer(serializers.ModelSerializer):
             full = " ".join(part for part in [first, last] if part).strip() or "Anonyme"
         attrs["name"] = full
         return attrs
+
+
+class ContactMessageAdminSerializer(serializers.ModelSerializer):
+    """Vue admin: message + satisfaction + horodatage."""
+
+    class Meta:
+        model = ContactMessage
+        fields = ["id", "message", "satisfaction", "created_at"]

@@ -6,13 +6,21 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 
 from weeb_app.models import ContactMessage
 
 from .ml import predict_satisfaction
-from .serializers import ContactMessageSerializer
+from .serializers import ContactMessageAdminSerializer, ContactMessageSerializer
+
+
+class IsActiveOrAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+        return bool(user.is_staff or user.is_active)
 
 
 class ContactMessageCreateView(CreateAPIView):
@@ -28,6 +36,14 @@ class ContactMessageCreateView(CreateAPIView):
         message = serializer.validated_data.get("message", "")
         satisfaction, score = predict_satisfaction(message)
         serializer.save(satisfaction=satisfaction, satisfaction_score=score)
+
+
+class ContactMessageListView(ListAPIView):
+    """Lecture admin/membre des messages (message + satisfaction + date)."""
+
+    serializer_class = ContactMessageAdminSerializer
+    permission_classes = [IsActiveOrAdmin]
+    queryset = ContactMessage.objects.all().order_by("-created_at")
 
 
 @api_view(["GET"])
