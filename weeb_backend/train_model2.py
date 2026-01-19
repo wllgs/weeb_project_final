@@ -44,9 +44,11 @@ def load_data(use_allocine: bool = True, path: str = "YoutubeCommentsDataset.csv
         df = df[df["Sentiment"].str.lower().isin(["negative", "positive"])]
         df["Sentiment"] = df["Sentiment"].str.lower().map({"negative": 0, "positive": 1})
 
+    df["Sentiment"] = pd.to_numeric(df["Sentiment"], errors="coerce")
+    df = df[df["Sentiment"].isin([0, 1])]
     df = df.dropna(subset=["Comment", "Sentiment"])
     df["Comment_clean"] = df["Comment"].apply(clean)
-    print("Répartition initiale :", df["Sentiment"].value_counts().to_dict())
+    print("Repartition initiale :", df["Sentiment"].value_counts().to_dict())
     return df
 
 

@@ -1,9 +1,17 @@
 from pathlib import Path
 from typing import Tuple
 import pickle
+import re
 
 
 MODEL_PATH = Path(__file__).resolve().parent.parent / "allocine_model.pkl"
+THRESHOLD = 0.4
+
+
+def clean(text: str) -> str:
+    text = str(text).lower()
+    text = re.sub(r"[^\w\s]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def _load_model():
@@ -28,20 +36,24 @@ def predict_satisfaction(message: str) -> Tuple[int, float]:
     if not message:
         raise ValueError("message manquant pour la prediction")
 
-    prediction = MODEL.predict([message])[0]
+    cleaned = clean(message)
 
     # Probabilite de la classe positive (1) si disponible.
     try:
-        proba = MODEL.predict_proba([message])[0]
-        classes = list(MODEL.classes_)
-        if 1 in classes:
-            score = float(proba[classes.index(1)])
-        elif 0 in classes and len(classes) > 1:
-            score = 1.0 - float(proba[classes.index(0)])
-        else:
-            score = float(prediction)
+        proba = MODEL.predict_proba([cleaned])[0]
+        classes = getattr(MODEL, "classes_", None)
+        if classes is None and hasattr(MODEL, "named_steps"):
+            classes = getattr(MODEL.named_steps.get("clf"), "classes_", None)
+        classes = list(classes or [])
+        if 1 not in classes:
+            raise RuntimeError(f"Modele non-binaire detecte (classes={classes}).")
+        score = float(proba[classes.index(1)])
+        prediction = 1 if score >= THRESHOLD else 0
     except Exception:
         # Au cas ou predict_proba n'est pas disponible
+        prediction = MODEL.predict([cleaned])[0]
+        if prediction not in (0, 1):
+            raise RuntimeError(f"Modele non-binaire detecte (prediction={prediction}).")
         score = float(prediction)
 
     return int(prediction), score
