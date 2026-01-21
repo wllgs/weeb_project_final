@@ -7,3 +7,6 @@ CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+AUTH_COOKIE_SECURE = True
+AUTH_COOKIE_SAMESITE = "None"
