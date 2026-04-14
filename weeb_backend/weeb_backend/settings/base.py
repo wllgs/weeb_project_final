@@ -143,13 +143,17 @@ X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'",)
-CSP_STYLE_SRC = ("'self'",)
-CSP_IMG_SRC = ("'self'", "data:")
-CSP_CONNECT_SRC = ("'self'", "http://localhost:5173", "http://127.0.0.1:5173")
-CSP_FONT_SRC = ("'self'", "data:")
-CSP_EXCLUDE_URL_PREFIXES = ("/admin/",)
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': ("'self'",),
+        'script-src': ("'self'",),
+        'style-src': ("'self'",),
+        'img-src': ("'self'", "data:"),
+        'connect-src': ("'self'", "http://localhost:5173", "http://127.0.0.1:5173"),
+        'font-src': ("'self'", "data:"),
+    },
+    'EXCLUDE_URL_PREFIXES': ("/admin/",),
+}
 
 AUTH_REFRESH_COOKIE = "weeb_refresh"
 AUTH_COOKIE_SECURE = config("AUTH_COOKIE_SECURE", default=False, cast=bool)

@@ -45,6 +45,10 @@ export default function Login() {
       <main className="flex-grow flex items-center justify-center px-14 py-10 mb-10">
         <div className="w-full max-w-md text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-8">Se connecter</h1>
+          
+          <p className="text-lg text-purple-300 mb-6">
+            Codes d'inscription d'exemple : admin@example.com / AdminPassword1234
+          </p>
 
           <form className="flex flex-col gap-6" onSubmit={handleLogin}>
             <input
